@@ -1,0 +1,7 @@
+D:\Код\Численные методы лабы\Laba1\Laba1\bin\Debug\Laba1.exe
+D:\Код\Численные методы лабы\Laba1\Laba1\bin\Debug\Laba1.pdb
+D:\Код\Численные методы лабы\Laba1\Laba1\obj\Debug\Laba1.csproj.AssemblyReference.cache
+D:\Код\Численные методы лабы\Laba1\Laba1\obj\Debug\Laba1.csproj.SuggestedBindingRedirects.cache
+D:\Код\Численные методы лабы\Laba1\Laba1\obj\Debug\Laba1.csproj.CoreCompileInputs.cache
+D:\Код\Численные методы лабы\Laba1\Laba1\obj\Debug\Laba1.exe
+D:\Код\Численные методы лабы\Laba1\Laba1\obj\Debug\Laba1.pdb
