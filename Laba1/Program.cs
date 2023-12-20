@@ -1,49 +1,83 @@
 ﻿using System;
- 
-namespace Laba1
+
+class Program
 {
-    class Program
+    static bool areThereSolutions = true;
+    static int n, m;
+    
+    static void Main()
     {
-        static void Main()
-    {
-        Console.WriteLine("Введите количество уравнений (строк матрицы):");
-        int n = int.Parse(Console.ReadLine());
+        Console.WriteLine("Введите количество уравнений (строк матрицы): ");
+        n = int.Parse(Console.ReadLine());
 
-        Console.WriteLine("Введите количество переменных (столбцов матрицы):");
-        int m = int.Parse(Console.ReadLine());
+        Console.WriteLine("Введите количество переменных (столбцов матрицы): ");
+        m = int.Parse(Console.ReadLine());
 
-        double[,] matrix = new double[n, m + 1]; // Расширенная матрица (коэффициенты + столбец свободных членов)
+        double[][] matrix = new double[n][];
+        for (int i = 0; i < n; ++i)
+        {
+            matrix[i] = new double[m + 1];
+        }
 
         Console.WriteLine("Введите коэффициенты матрицы построчно (по одному коэффициенту в строке):");
-
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < n; ++i)
         {
-            for (int j = 0; j < m + 1; j++)
+            for (int j = 0; j <= m; ++j)
             {
                 Console.Write($"A[{i + 1},{j + 1}] = ");
-                matrix[i, j] = double.Parse(Console.ReadLine());
+                matrix[i][j] = double.Parse(Console.ReadLine());
             }
         }
 
-        // Решение СЛАУ методом Гаусса
-        int rank = SolveGauss(matrix, n, m);
+        double[][] matrixForNevyazka = new double[n][];
+        Array.Copy(matrix, matrixForNevyazka, n);
 
-        // Вывод решения
-        PrintSolution(matrix, rank);
+        solveGauss(matrix);
+        int rank = m;
+
+        int tmp = 0;
+        for (int i = 0; i < n; ++i)
+        {
+            int cntNullStr = 0;
+            for (int j = 0; j <= m; ++j)
+            {
+                Console.Write(matrix[i][j] + " ");
+                if (matrix[i][j] == 0 && j != m)
+                    cntNullStr++;
+            }
+
+            if (cntNullStr == m)
+            {
+                tmp++;
+                if (matrix[i][m] != 0)
+                    areThereSolutions = false;
+            }
+
+            Console.WriteLine();
+        }
+
+        rank -= tmp;
+        printSolution(matrix, rank);
     }
 
-    static int SolveGauss(double[,] matrix, int n, int m)
+    static void swapRows(double[][] matrix, int row1, int row2)
     {
-        int rank = 0;
+        double[] temp = matrix[row1];
+        matrix[row1] = matrix[row2];
+        matrix[row2] = temp;
+    }
 
-        // Прямой ход
-        for (int k = 0; k < n; k++)
+    static void solveGauss(double[][] matrix)
+    {
+        int n = matrix.Length;
+        int m = matrix[0].Length - 1;
+
+        for (int k = 0; k < n; ++k)
         {
-            // Поиск первого ненулевого элемента в текущем столбце
             int firstNonZero = -1;
-            for (int i = k; i < n; i++)
+            for (int i = k; i < n; ++i)
             {
-                if (matrix[i, k] != 0)
+                if (matrix[i][k] != 0)
                 {
                     firstNonZero = i;
                     break;
@@ -52,93 +86,51 @@ namespace Laba1
 
             if (firstNonZero != -1)
             {
-                // Обмен текущей строки с строкой, содержащей первый ненулевой элемент
-                SwapRows(matrix, k, firstNonZero);
+                swapRows(matrix, k, firstNonZero);
 
-                // Нормализация строки
-                double div = matrix[k, k];
-                for (int j = k; j < m + 1; j++)
+                double div = matrix[k][k];
+                for (int j = k; j <= m; ++j)
                 {
-                    matrix[k, j] /= div;
+                    matrix[k][j] /= div;
                 }
 
-                // Вычитание текущей строки из остальных строк
-                for (int i = 0; i < n; i++)
+                for (int i = 0; i < n; ++i)
                 {
                     if (i != k)
                     {
-                        double factor = matrix[i, k];
-                        for (int j = k; j < m + 1; j++)
+                        double factor = matrix[i][k];
+                        for (int j = k; j <= m; ++j)
                         {
-                            matrix[i, j] -= factor * matrix[k, j];
+                            matrix[i][j] -= factor * matrix[k][j];
                         }
                     }
                 }
-
-                rank++;
             }
         }
-
-        return rank;
-    }
-    
-    static bool IsZeroVector(double[] v)
-    {
-        foreach (var x in v)
-        {
-            if (x != 0)
-            {
-                return false;
-            }
-        }
-        return true;
     }
 
-    static void PrintSolution(double[,] matrix, int rank)
+    static void printSolution(double[][] matrix, int rank)
     {
-        if (rank == matrix.GetLength(0))
+        if (rank == m)
         {
             Console.WriteLine("Решение системы:");
-            for (int i = 0; i < matrix.GetLength(0); i++)
+            for (int i = 0; i < matrix.Length; ++i)
             {
-                Console.WriteLine($"X{i + 1} = {matrix[i, matrix.GetLength(1) - 1]}");
+                Console.WriteLine($"X{i + 1} = {matrix[i][matrix[i].Length - 1]}");
+            }
+        }
+        else if (rank < m && areThereSolutions)
+        {
+            Console.WriteLine("Система имеет бесконечное количество решений.");
+            Console.WriteLine("Частное решение:");
+            for (int i = 0; i < matrix[0].Length - 1; ++i)
+            {
+                Console.WriteLine($"X{i + 1} = {(i < rank ? matrix[i][matrix[i].Length - 1] : 0)}");
             }
         }
         else
         {
-            for (int i = 0; i < matrix.GetLength(0); i++)
-            {
-                double[] copyV = new double[matrix.GetLength(1) - 1];
-                for (int j = 0; j < copyV.Length; j++)
-                {
-                    copyV[j] = matrix[i, j];
-                }
-
-                Console.Write(string.Join(", ", copyV) + " " + matrix[i, matrix.GetLength(1) - 1] + "\n");
-
-                if (IsZeroVector(copyV) && matrix[i, matrix.GetLength(1) - 1] != 0)
-                {
-                    Console.WriteLine("Решений нет");
-                    return;
-                }
-            }
-            Console.WriteLine("Система имеет бесконечное количество решений.");
-            Console.WriteLine("Частное решение:");
-            for (int i = 0; i < matrix.GetLength(1) - 1; i++)
-            {
-                Console.WriteLine($"X{i + 1} = {(i < rank ? matrix[i, matrix.GetLength(1) - 1] : 0)}");
-            }
+            Console.WriteLine("Система не имеет решений");
         }
-    }
-
-    static void SwapRows(double[,] matrix, int row1, int row2)
-    {
-        for (int j = 0; j < matrix.GetLength(1); j++)
-        {
-            double temp = matrix[row1, j];
-            matrix[row1, j] = matrix[row2, j];
-            matrix[row2, j] = temp;
-        }
-    }    
     }
 }
